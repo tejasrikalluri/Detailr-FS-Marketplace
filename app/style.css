@@ -1,0 +1,41 @@
+.contact-detail {
+    margin-bottom: 5px;
+    margin-left: 5px;
+    clear: both;
+    color: #333333;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    font-weight: normal;
+}
+
+.contact-detail .contact-detail-label {
+    color: #333333 !important;
+    font-size: 14px !important;
+    font-weight: bold;
+    display: block;
+    margin-bottom: -5px
+}
+
+.contact-detail .contact-detail-value {
+    font-size: 13px !important;
+    font-weight: normal;
+    display: inline-block;
+    vertical-align: middle;
+    padding: 3px
+}
+
+.hidden {
+    display: none
+}
+
+.ucwords {
+    text-transform: capitalize;
+}
+
+.star {
+    color: red;
+}
+
+#msg,
+#load {
+    padding-left: 10px;
+}

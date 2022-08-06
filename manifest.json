@@ -1,0 +1,27 @@
+{
+    "platform-version": "2.0",
+    "product": {
+        "freshservice": {
+            "location": {
+                "ticket_requester_info": {
+                    "url": "template.html",
+                    "icon": "user.svg"
+                },
+                "contact_sidebar": {
+                    "url": "template.html",
+                    "icon": "user.svg"
+                },
+                "new_ticket_sidebar": {
+                    "url": "template.html",
+                    "icon": "user.svg"
+                }
+            }
+        }
+    },
+    "whitelisted-domains": [
+        "https://*.freshservice.com"
+    ],
+    "dependencies": {
+        "base-64": "0.1.0"
+    }
+}
