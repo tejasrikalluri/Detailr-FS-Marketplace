@@ -4,54 +4,60 @@ function displayErr(error, client) {
     $('#msg').html('');
     client.interface.trigger('showNotify', { type: 'error', message: 'Error: ' + message });
 }
-var formatRequesterData = function(requesterData, callback) {
-        $.each(requesterData, function(key, val) {
-            if (val !== null) {
-                let newVal = val;
-                switch (key) {
-                    case 'department_names':
-                    case 'company_names':
-                        newVal = showCompany_ticketPage(val);
-                        break;
-                    case 'created_at':
-                    case 'updated_at':
-                        newVal = showcreatedDate_ticketPage(val);
-                        break;
-                    case 'custom_field':
-                        newVal = formatCustomFields(val);
-                        break;
-                    default:
-                        newVal = val;
-                        break;
-                }
-                requesterData[key] = newVal;
+var formatRequesterData = function (requesterData, configParams, callback) {
+    $.each(requesterData, function (key, val) {
+        if (val !== null) {
+            let newVal = val;
+            switch (key) {
+                case 'department_names':
+                case 'company_names':
+                    newVal = showCompany_ticketPage(val);
+                    break;
+                case 'created_at':
+                case 'updated_at':
+                    newVal = showcreatedDate_ticketPage(val);
+                    break;
+                case 'custom_field':
+                    newVal = formatCustomFields(val, configParams.cust_field);
+                    break;
+                default:
+                    newVal = val;
+                    break;
             }
-        });
-        callback(requesterData);
-    }
-    //Set values and shows respective divs
+            requesterData[key] = newVal;
+        }
+    });
+    callback(requesterData);
+}
+//Set values and shows respective divs
 function setValues(configParams, requesterData, newFlag) {
     if (newFlag === false) {
         $('#msg,#load').empty();
         $('#div-fields').show();
     }
-    let numberOfFieldsDisplayed = 0;
+    // let numberOfFieldsDisplayed = 0;
     let paramsPrefix = 'contact_';
-    $.each(requesterData, function(key, val) {
+    $.each(requesterData, function (key, val) {
         if (configParams[paramsPrefix + (key === 'company_names' ? 'department_names' : key)] === true) {
             $('#div-' + key).removeClass('hidden');
             if (isValNotEmpty(val)) {
                 $('#' + paramsPrefix + key).html(val);
             }
-            numberOfFieldsDisplayed++;
+            // numberOfFieldsDisplayed++;
+        }
+        if (key == "custom_fields") {
+            console.log("has custom fields")
+            var newValue = formatCustomFields(requesterData.result.custom_fields, configParams.cust_field);
+            $("#contact_custom_field").html(newValue);
+            $("#div-custom_field").removeClass('hidden');
         }
     });
-    if (numberOfFieldsDisplayed === 0) {
-        if (newFlag === false) {
-            $('#div-empty').removeClass('hidden');
-            $('#msg,#load').empty();
-        }
-    }
+    /*  if (numberOfFieldsDisplayed === 0) {
+         if (newFlag === false) {
+             $('#div-empty').removeClass('hidden');
+             $('#msg,#load').empty();
+         }
+     } */
 }
 
 function showCompany_ticketPage(val) {
@@ -68,34 +74,34 @@ function showcreatedDate_ticketPage(val) {
         return newVal;
     }
 }
-$(document).ready(function() {
-    app.initialized().then(function(_client) {
+$(document).ready(function () {
+    app.initialized().then(function (_client) {
         let client = _client;
         $("#errorDiv").hide();
-        var getConfigurationParams = function(callback) {
-            client.iparams.get().then(function(data) {
+        var getConfigurationParams = function (callback) {
+            client.iparams.get().then(function (data) {
                 var fieldObj = data.obj;
                 callback(null, fieldObj);
                 if (!fieldObj) {
                     throw new Error("We were not able to retrieve your configuration, please check your installation settings or reinstall app.");
                 }
-            }).catch(function(error) {
+            }).catch(function (error) {
                 callback(error);
             });
         };
-        var getRequesterData = function(callback) {
-            client.data.get('requester').then(function(data) {
+        var getRequesterData = function (callback) {
+            client.data.get('requester').then(function (data) {
                 var req_data = data.requester;
                 callback(req_data);
-            }).catch(function() {
+            }).catch(function () {
                 displayErr("Unexpected error occurred, please try after some time.", client);
             });
         };
-        var getReqDetail = function(email, callback) {
+        var getReqDetail = function (email, callback) {
             var options = {
                 email: btoa(email)
             };
-            client.request.invoke("searchRequester", options).then(function(data) {
+            client.request.invoke("searchRequester", options).then(function (data) {
                 var requiredData = data.response.finalResult;
                 if (requiredData === null) {
                     $('#msg').html('');
@@ -103,15 +109,15 @@ $(document).ready(function() {
                 } else {
                     callback(requiredData);
                 }
-            }, function() {
+            }, function () {
                 displayErr("Unexpected error occurred, please try after some time.", client);
             });
         };
-        var getAgentDetail = function(email, callback) {
+        var getAgentDetail = function (email, callback) {
             let options = {
                 email: btoa(email)
             };
-            client.request.invoke("searchAgent", options).then(function(data) {
+            client.request.invoke("searchAgent", options).then(function (data) {
                 var requiredData = data.response.finalResult;
                 if (requiredData === null) {
                     $('#msg').html('');
@@ -119,15 +125,15 @@ $(document).ready(function() {
                 } else {
                     callback(requiredData);
                 }
-            }, function() {
+            }, function () {
                 displayErr("Unexpected error occurred, please try after some time.", client);
             });
         };
-        var getLocation = function(val, callback) {
+        var getLocation = function (val, callback) {
             var options = {
                 id: btoa(val)
             };
-            client.request.invoke("getLocation", options).then(function(data) {
+            client.request.invoke("getLocation", options).then(function (data) {
                 var name = data.response.result;
                 if (name === null) {
                     $('#msg').html('');
@@ -135,15 +141,15 @@ $(document).ready(function() {
                 } else {
                     callback(name);
                 }
-            }, function() {
+            }, function () {
                 displayErr("Unexpected error occurred, please try after some time.", client);
             });
         };
-        var getDepartment = function(depart_id, callback) {
+        var getDepartment = function (depart_id, callback) {
             var options = {
                 id: btoa(depart_id)
             };
-            client.request.invoke("getDepartment", options).then(function(data) {
+            client.request.invoke("getDepartment", options).then(function (data) {
                 var name = data.response.result;
                 if (name === null) {
                     $('#msg').html('');
@@ -151,22 +157,22 @@ $(document).ready(function() {
                 } else {
                     callback(name);
                 }
-            }, function() {
+            }, function () {
                 displayErr("Unexpected error occurred, please try after some time.", client);
             });
         };
-        var getAppLocation = function(callback) {
-            client.instance.context().then(function(context) {
+        var getAppLocation = function (callback) {
+            client.instance.context().then(function (context) {
                 var location = context.location;
                 callback(location);
-            }, function() {
+            }, function () {
                 displayErr("Unexpected error occurred, please try after some time.", client);
             });
         };
 
         function process(count, val, d_size, nameArr) {
             if (count < d_size) {
-                getDepartment(val[count], function(name) {
+                getDepartment(val[count], function (name) {
                     nameArr.push(name);
                     var num = count;
                     num = num + 1;
@@ -182,7 +188,7 @@ $(document).ready(function() {
             if (location === "new_ticket_sidebar") {
                 $('#msg').html("Please Select Requester");
                 $('#load').empty();
-                var propertyChangeCallback = function(event) {
+                var propertyChangeCallback = function (event) {
                     var event_data = event.helper.getData();
                     var req_email = event_data.new;
                     $('#contact_department_names').html("N/A");
@@ -191,12 +197,12 @@ $(document).ready(function() {
                     $('#contact_job_title').html("N/A")
                     $('#msg').html("Loading, please wait...");
                     $('#div-fields').hide();
-                    getReqDetail(req_email, function(reqdata) {
+                    getReqDetail(req_email, function (reqdata) {
                         if (reqdata.result !== undefined) {
                             $('#div-department_names,#div-company_names,#div-address').show();
                             displayFields(configParams, reqdata);
                         } else {
-                            getAgentDetail(req_email, function(agentdata) {
+                            getAgentDetail(req_email, function (agentdata) {
                                 $('#div-department_names,#div-company_names,#div-address').hide();
                                 displayFields(configParams, agentdata);
                             })
@@ -210,9 +216,11 @@ $(document).ready(function() {
 
         function showData_TicketDetailPage(location, configParams) {
             if (location === "ticket_requester_info" || location === "contact_sidebar") {
-                getRequesterData(function(req_data) {
-                    formatRequesterData(req_data, function(data) {
+                console.log("*****************************")
+                getRequesterData(function (req_data) {
+                    formatRequesterData(req_data, configParams, function (data) {
                         if (configParams.contact_custom_field === true) {
+                            console.log("custom field configured in settings page")
                             var flag = true;
                             setValues(configParams, data, flag);
                         } else {
@@ -222,12 +230,12 @@ $(document).ready(function() {
                     });
                     if (configParams.contact_custom_field === true) {
                         var req_email = req_data.email;
-                        getAgentDetail(req_email, function(agentdata) {
+                        getAgentDetail(req_email, function (agentdata) {
                             if (agentdata.result === undefined) {
-                                getReqDetail(req_email, function(reqdata) {
+                                getReqDetail(req_email, function (reqdata) {
                                     var val = reqdata.labelValueObj;
                                     $('#div-custom_field').removeClass('hidden');
-                                    var newValue = formatCustomFields(val);
+                                    var newValue = formatCustomFields(val, configParams.cust_field);
                                     $('#contact_custom_field').html(newValue);
                                     if ($.isEmptyObject(val)) {
                                         $('#contact_custom_field').html("N/A");
@@ -239,7 +247,7 @@ $(document).ready(function() {
                             } else {
                                 var val = agentdata.labelValueObj;
                                 $('#div-custom_field').removeClass('hidden');
-                                var newValue = formatCustomFields(val);
+                                var newValue = formatCustomFields(val, configParams.cust_field);
                                 $('#contact_custom_field').html(newValue);
                                 if ($.isEmptyObject(val)) {
                                     $('#contact_custom_field').html("N/A");
@@ -254,28 +262,31 @@ $(document).ready(function() {
             }
         }
 
-        client.events.on('app.activated', function() {
+        client.events.on('app.activated', function () {
             $('#msg').html("Loading, please wait...");
-            $("#div-fields").hide();
-            getConfigurationParams(function(error, data) {
+            // $("#div-fields").hide();
+            $(".default-content,.custom-content").hide();
+            getConfigurationParams(function (error, data) {
                 if (error) {
                     displayErr("Unexpected error occurred, please try after some time.", client);
                 } else {
+                    console.log("AAAAAAAAAAAAAAAAAA")
                     var configParams = data;
                     var flag = checkselectedFields(configParams);
-                    if (!flag) {
+                    console.log(flag)
+                    /* if (!flag) {
                         $('#div-empty').removeClass('hidden');
                         $('#msg,#load').empty();
-                    } else {
-                        $('#div-empty').empty();
-                        getAppLocation(function(location) {
-                            showData_TicketDetailPage(location, configParams);
-                            showData_newTicketPage(location, configParams);
-                        });
-                    }
+                    } else { */
+                    $('#div-empty').empty();
+                    getAppLocation(function (location) {
+                        showData_TicketDetailPage(location, configParams);
+                        showData_newTicketPage(location, configParams);
+                    });
+                    // }
                 }
             });
-        }, function() {
+        }, function () {
             displayErr("Unexpected error occurred, please try after some time.", client);
         });
 
@@ -291,7 +302,7 @@ $(document).ready(function() {
             $('#div-fields').show();
             $('#msg,#load').empty();
             var paramsPrefix = "contact_";
-            $.each(reqData.result, function(key, val) {
+            $.each(reqData.result, function (key, val) {
                 if (configParams[paramsPrefix + key] === true) {
                     showDefault(paramsPrefix, key, val);
                 }
@@ -370,7 +381,7 @@ $(document).ready(function() {
             if (key === "custom_fields") {
                 if (configParams["contact_custom_field"] === true) {
                     $('#div-custom_field').removeClass('hidden');
-                    var newValue = formatCustomFields(val);
+                    var newValue = formatCustomFields(val, configParams.cust_field);
                     $('#contact_custom_field').html(newValue);
                     if ($.isEmptyObject(val)) {
                         $('#contact_custom_field').html("N/A");
@@ -398,14 +409,14 @@ $(document).ready(function() {
                 $('#div-location_name').removeClass('hidden');
                 if (key === "location_id") {
                     if (val !== null && val !== '' && val !== undefined) {
-                        getLocation(val, function(location) {
+                        getLocation(val, function (location) {
                             $('#contact_location_name').html(location);
                         });
                     }
                 }
             }
         }
-    }, function() {
+    }, function () {
         displayErr("Unexpected error occurred, please try after some time.", client);
     });
 });

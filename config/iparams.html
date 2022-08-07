@@ -7,12 +7,14 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css" />
     <script src="https://static.freshdev.io/fdk/2.0/assets/fresh_client.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="https://static.freshdev.io/fdk/2.0/assets/freshservice.css">
     <style>
         .checkboxes-group {
             margin-bottom: 40px;
         }
-        
+
         .form-control {
             border: 1px #dadfe3 solid !important;
             border-bottom: 1px #dadfe3 solid !important;
@@ -21,12 +23,12 @@
             padding-left: 10px !important;
             font-size: 13px !important;
         }
-        
+
         .btn {
             background-color: #264966 !important;
             border-color: #12344d;
         }
-        
+
         .star {
             color: red;
         }
@@ -85,13 +87,12 @@
                     <input type="checkbox" id="contact_department_names"> Departments/Companies<span
                         class="star">**</span>
                 </label>
-
-                <label class="checkbox-inline">
-                    <input type="checkbox" id="contact_custom_field"> Custom Fields
-                </label>
             </fieldset>
         </div>
-
+        <div class="m5t form-group" id="contactCustomFields">
+            <label>Choose custom fields</label><br />
+            <select id="multiCustFields" multiple="multiple" class="width form-control select2"></select>
+        </div>
         <div class="checkboxes-group account-fields">
             <fieldset>
                 <legend>Account Fields</legend>
@@ -152,19 +153,28 @@
 
             </fieldset>
         </div>
+        <div id="customErr" class="star m10t">
+            Please choose atleast one field
+        </div>
         <div>
-            <div><b>Note: </b>Fields marked with <span class="star"> '*' </span>will not be shown in the New Ticket page (expect for verified agents).
+            <div><b>Note: </b>Fields marked with <span class="star"> '*' </span>will not be shown in the New Ticket page
+                (expect for verified agents).
             </div>
-            <div><b>Note: </b>Fields marked with <span class="star">'**'</span> will not be shown in Requester/Contact detail page.</div>
+            <div><b>Note: </b>Fields marked with <span class="star">'**'</span> will not be shown in Requester/Contact
+                detail page.</div>
             <div><b>Note: </b>Address and Departments/Companies fields will not be shown for Agents in New Ticket page.
             </div>
         </div>
     </div>
     <script type="text/javascript">
-        app.initialized().then(function(client) {
+        let updateConfigs;
+        $("#multiCustFields").select2({
+            closeOnSelect: false, width: '75%'
+        });
+        app.initialized().then(function (client) {
             window.client = client;
-            $('.settingsPage').hide();
-            $('#btnNext').click(function() {
+            $('.settingsPage,#customErr').hide();
+            $('#btnNext').click(function () {
                 $(this).prop("disabled", true);
                 document.getElementById("btnNext").innerHTML = "Authenticating...";
                 $("#error_div,#error_url_div").empty();
@@ -176,7 +186,10 @@
                     validateError(fd_url, api_key);
                 }
             });
-        }, function(error) {
+            $("select,input[type=checkbox]").change(function () {
+                $("#customErr").hide();
+            });
+        }, function (error) {
             handleError(error);
         });
 
@@ -189,24 +202,70 @@
             var options = {
                 headers: headers
             };
-            client.request.get(url, options).then(function(data) {
+            client.request.get(url, options).then(function (data) {
+                getContactFields(fd_url, api_key);
                 $('.settingsPage').show();
                 $('.fdsettings').hide();
+                if (!updateConfigs) {
+                    $("#contactFields").hide();
+                }
                 document.getElementById("btnNext").innerHTML = "Authenticated";
-            }, function(error) {
+            }, function (error) {
                 handleError(error);
             });
-
+        }
+        function getContactFields(fd_url, api_key) {
+            var url = "https://" + fd_url + "/api/v2/requester_fields";
+            var headers = {
+                Authorization: "Basic " + btoa(api_key + ":x"),
+                contentType: "application/json"
+            };
+            var options = {
+                headers: headers
+            };
+            client.request.get(url, options).then(
+                function (field_data) {
+                    try {
+                        var selectOptions = [];
+                        var dataRes = JSON.parse(field_data.response);
+                        var requester_fields = dataRes.requester_fields;
+                        for (var i = 0; i < requester_fields.length; i++) {
+                            if (requester_fields[i].default === false) {
+                                var field_label = requester_fields[i].label;
+                                var field_name = requester_fields[i].name;
+                                selectOptions.push(
+                                    `<option value=${field_name}>${field_label}</option>`
+                                );
+                            }
+                        }
+                        $("#multiCustFields").html(selectOptions.join(""));
+                        if (updateConfigs !== undefined) {
+                            if (updateConfigs.cust_field.length > 0) {
+                                $("#multiCustFields")
+                                    .val(updateConfigs.cust_field)
+                                    .trigger("change");
+                            }
+                        }
+                    } catch (error) {
+                        handleError(error);
+                    }
+                },
+                function (error) {
+                    handleError(error);
+                }
+            );
         }
 
         function postConfigs() {
             var checkboxes = $("input[type=checkbox]");
             var fd_domain = $('#fdUrl').val();
             var api_key = $('#txtApiKey').val();
-            var ids = checkboxes.map(function() {
+            let selected_fields = $("#multiCustFields").select2("data");
+            let optionsArr = $("#multiCustFields").val();
+            var ids = checkboxes.map(function () {
                 return this.id;
             }).get();
-            var isChecked = checkboxes.map(function() {
+            var isChecked = checkboxes.map(function () {
                 return $(this).is(':checked');
             }).get();
             const obj = ids.reduce((obj, value, index) => {
@@ -215,19 +274,25 @@
             }, {});
             return {
                 __meta: {
-                    secure: ["api_key"]
+                    secure: ["api_key"],
                 },
-                api_key,
-                obj: obj,
-                domain: fd_domain
-            }
+                api_key: btoa(api_key),
+                obj,
+                domain: btoa(fd_domain),
+                cust_field: optionsArr
+            };
         }
 
         function getConfigs(configs) {
-            $('#fdUrl').val(configs.domain);
-            $('#txtApiKey').val(configs.api_key);
-            $.each(configs.obj, function(key, value) {
+            console.log(configs)
+            updateConfigs = configs;
+            $("#fdUrl").val(atob(configs.domain));
+            $("#txtApiKey").val(atob(configs.api_key));
+            $.each(configs.obj, function (key, value) {
                 $('#' + key).prop('checked', JSON.parse(value));
+                if (key === "contact_custom_field") {
+                    (value === true) ? $("#contactFields").show() : $("#contactFields").hide();
+                }
             });
         }
 
@@ -239,7 +304,30 @@
                     "Please click Authenticate button to proceed with installation/updation process.");
                 isValid = false;
             } else {
+                let isChecked = $("input[type=checkbox]")
+                    .map(function () {
+                        return $(this).is(":checked");
+                    })
+                    .get();
+                let ids = $("input[type=checkbox]")
+                    .map(function () {
+                        return this.id;
+                    })
+                    .get();
+                const obj = ids.reduce((obj, value, index) => {
+                    obj[value] = isChecked[index];
+                    return obj;
+                }, {});
                 $("#error_div,#error_url_div").hide();
+                var selected_fields = $("#multiCustFields").select2("data");
+                if (selected_fields.length || !Object.values(obj).every(o => !o)) {
+                    $("#customErr").hide();
+                    isValid = true;
+                } else {
+                    $("#customErr").show();
+                    $("#contactFields").removeClass(".m5t").addClass(".m15t");
+                    isValid = false;
+                }
             }
             return isValid;
         }

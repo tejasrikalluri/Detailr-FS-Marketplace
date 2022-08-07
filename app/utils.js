@@ -16,9 +16,24 @@ function formatDate(val) {
 }
 
 //formats custom fields
-function formatCustomFields(values) {
+function formatCustomFields(values, cust_fields) {
     let custArr = [];
-    $.each(values, function(key, val) {
+    $.each(cust_fields, function (key, val) {
+        let value;
+        (values[val] && values[val] != " ") ? value = values[val] : value = "N/A";
+        console.log(val, val.replace(/\_/g, " "), val.replace(/\_/g, " ").slice(1))
+        custArr.push(
+            '<div><span class="muted ucwords" style="color:#475867;margin-right: 2%;">' +
+            val.replace(/\_/g, " ").charAt(0).toUpperCase() + val.replace(/\_/g, " ").slice(1) +
+            "</span>",
+            ": ",
+            '<span class="muted ucwords">' +
+            xss_test(value) +
+            "</span>",
+            "<br/></div>"
+        );
+    });
+    /* $.each(values, function (key, val) {
         let newVal = 'N/A';
         if (isValNotEmpty(val)) {
             newVal = val;
@@ -32,7 +47,7 @@ function formatCustomFields(values) {
             xss_test(newVal),
             '<br/>'
         );
-    });
+    }); */
     return custArr.join('');
 }
 
