@@ -1,45 +1,45 @@
 {
-    "platform-version": "2.2",
-    "product": {
-        "freshservice": {
-            "location": {
-                "ticket_requester_info": {
-                    "url": "template.html",
-                    "icon": "user.svg"
-                },
-                "contact_sidebar": {
-                    "url": "template.html",
-                    "icon": "user.svg"
-                },
-                "new_ticket_sidebar": {
-                    "url": "template.html",
-                    "icon": "user.svg"
-                }
-            },
-            "functions": {
-                "searchAgent": {
-                    "timeout": 10
-                },
-                "searchRequester": {
-                    "timeout": 10
-                },
-                "getDepartment": {
-                    "timeout": 10
-                },
-                "getLocation": {
-                    "timeout": 10
-                }
-            }
+  "platform-version": "2.2",
+  "product": {
+    "freshservice": {
+      "location": {
+        "ticket_requester_info": {
+          "url": "template.html",
+          "icon": "user.svg"
+        },
+        "contact_sidebar": {
+          "url": "template.html",
+          "icon": "user.svg"
+        },
+        "new_ticket_sidebar": {
+          "url": "template.html",
+          "icon": "user.svg"
         }
-    },
-    "whitelisted-domains": [
-        "https://*.freshservice.com"
-    ],
-    "dependencies": {
-        "base-64": "0.1.0"
-    },
-    "engines": {
-        "node": "14.17.3",
-        "fdk": "8.3.1"
+      },
+      "functions": {
+        "searchAgent": {
+          "timeout": 10
+        },
+        "searchRequester": {
+          "timeout": 10
+        },
+        "getDepartment": {
+          "timeout": 10
+        },
+        "getLocation": {
+          "timeout": 10
+        }
+      }
     }
+  },
+  "whitelisted-domains": [
+    "https://*.freshservice.com"
+  ],
+  "dependencies": {
+    "base-64": "0.1.0"
+  },
+  "engines": {
+    "node": "14.17.3",
+    "fdk": "8.3.1"
+  }
 }

@@ -31,11 +31,13 @@ var formatRequesterData = function (requesterData, configParams, callback) {
 }
 //Set values and shows respective divs
 function setValues(configParams, requesterData, newFlag) {
-    if (newFlag === false) {
-        $('#msg,#load').empty();
-        $('#div-fields').show();
-    }
+    // if (newFlag === false) {
+    //     $('#msg,#load').empty();
+    //     $('#div-fields').show();
+    // }
     // let numberOfFieldsDisplayed = 0;
+    $("#msg,#load").empty();
+    showContent(configParams, configParams.cust_field);
     let paramsPrefix = 'contact_';
     $.each(requesterData, function (key, val) {
         if (configParams[paramsPrefix + (key === 'company_names' ? 'department_names' : key)] === true) {
@@ -45,9 +47,8 @@ function setValues(configParams, requesterData, newFlag) {
             }
             // numberOfFieldsDisplayed++;
         }
-        if (key == "custom_fields") {
-            console.log("has custom fields")
-            var newValue = formatCustomFields(requesterData.result.custom_fields, configParams.cust_field);
+        if (key == "custom_field") {
+            var newValue = formatCustomFields(requesterData.custom_field, configParams.cust_field);
             $("#contact_custom_field").html(newValue);
             $("#div-custom_field").removeClass('hidden');
         }
@@ -58,6 +59,16 @@ function setValues(configParams, requesterData, newFlag) {
              $('#msg,#load').empty();
          }
      } */
+}
+const showContent = function (configParams, cust_field) {
+    console.log(checkselectedFields(configParams))
+    if (checkselectedFields(configParams)) $(".default-content").show();
+    if (cust_field.length)
+        $(".custom-content").show();
+}
+function checkselectedFields(configParams) {
+    console.log(configParams)
+    return (Object.values(configParams).indexOf(true) > -1) ? true : false;
 }
 
 function showCompany_ticketPage(val) {
@@ -80,7 +91,7 @@ $(document).ready(function () {
         $("#errorDiv").hide();
         var getConfigurationParams = function (callback) {
             client.iparams.get().then(function (data) {
-                var fieldObj = data.obj;
+                var fieldObj = data;
                 callback(null, fieldObj);
                 if (!fieldObj) {
                     throw new Error("We were not able to retrieve your configuration, please check your installation settings or reinstall app.");
@@ -93,7 +104,7 @@ $(document).ready(function () {
             client.data.get('requester').then(function (data) {
                 var req_data = data.requester;
                 callback(req_data);
-            }).catch(function () {
+            }).catch(function (e) {
                 displayErr("Unexpected error occurred, please try after some time.", client);
             });
         };
@@ -216,11 +227,9 @@ $(document).ready(function () {
 
         function showData_TicketDetailPage(location, configParams) {
             if (location === "ticket_requester_info" || location === "contact_sidebar") {
-                console.log("*****************************")
                 getRequesterData(function (req_data) {
                     formatRequesterData(req_data, configParams, function (data) {
-                        if (configParams.contact_custom_field === true) {
-                            console.log("custom field configured in settings page")
+                        if (configParams.cust_field.length) {
                             var flag = true;
                             setValues(configParams, data, flag);
                         } else {
@@ -228,7 +237,7 @@ $(document).ready(function () {
                             setValues(configParams, data, flag);
                         }
                     });
-                    if (configParams.contact_custom_field === true) {
+                    if (configParams.cust_field.length) {
                         var req_email = req_data.email;
                         getAgentDetail(req_email, function (agentdata) {
                             if (agentdata.result === undefined) {
@@ -270,10 +279,8 @@ $(document).ready(function () {
                 if (error) {
                     displayErr("Unexpected error occurred, please try after some time.", client);
                 } else {
-                    console.log("AAAAAAAAAAAAAAAAAA")
                     var configParams = data;
                     var flag = checkselectedFields(configParams);
-                    console.log(flag)
                     /* if (!flag) {
                         $('#div-empty').removeClass('hidden');
                         $('#msg,#load').empty();
@@ -290,13 +297,6 @@ $(document).ready(function () {
             displayErr("Unexpected error occurred, please try after some time.", client);
         });
 
-        function checkselectedFields(configParams) {
-            if (Object.values(configParams).indexOf(true) > -1) {
-                return true;
-            } else {
-                return false;
-            }
-        }
 
         function displayFields(configParams, reqData) {
             $('#div-fields').show();

@@ -1,9 +1,9 @@
 var base64 = require('base-64');
 
 exports = {
-    searchAgent: function(args) {
-        var domain = args.iparams.domain;
-        var apiKey = args.iparams.api_key;
+    searchAgent: function (args) {
+        var domain = base64.decode(args.iparams.domain);
+        var apiKey = base64.decode(args.iparams.api_key);
         var email = base64.decode(args.email);
         var url = 'https://' + domain + '/api/v2/agents?email=' + email;
         var headers = {
@@ -13,7 +13,7 @@ exports = {
         var reqData = {
             headers: headers
         };
-        $request.get(url, reqData).then(function(data) {
+        $request.get(url, reqData).then(function (data) {
             var result = JSON.parse(data.response).agents;
             if (result.length === 0) {
                 let requiredData = {};
@@ -24,15 +24,15 @@ exports = {
             } else {
                 getContactCustomFieldsLabel(args, result);
             }
-        }, function() {
+        }, function (e) {
             renderData(null, {
                 finalResult: null
             });
         });
     },
-    searchRequester: function(args) {
-        var domain = args.iparams.domain;
-        var apiKey = args.iparams.api_key;
+    searchRequester: function (args) {
+        var domain = base64.decode(args.iparams.domain);
+        var apiKey = base64.decode(args.iparams.api_key);
         var email = base64.decode(args.email);
         var url = 'https://' + domain + '/api/v2/requesters?email=' + email;
         var headers = {
@@ -42,7 +42,7 @@ exports = {
         var reqData = {
             headers: headers
         };
-        $request.get(url, reqData).then(function(data) {
+        $request.get(url, reqData).then(function (data) {
             var result = JSON.parse(data.response).requesters;
             if (result.length === 0) {
                 let requiredData = {};
@@ -53,15 +53,15 @@ exports = {
             } else {
                 getContactCustomFieldsLabel(args, result);
             }
-        }, function() {
+        }, function () {
             renderData(null, {
                 finalResult: null
             });
         });
     },
-    getDepartment: function(args) {
-        var domain = args.iparams.domain;
-        var apiKey = args.iparams.api_key;
+    getDepartment: function (args) {
+        var domain = base64.decode(args.iparams.domain);
+        var apiKey = base64.decode(args.iparams.api_key);
         var id = base64.decode(args.id);
         var url = "https://" + domain + "/api/v2/departments/" + id
         var headers = {
@@ -71,21 +71,21 @@ exports = {
         var reqData = {
             headers: headers
         };
-        $request.get(url, reqData).then(function(data) {
+        $request.get(url, reqData).then(function (data) {
             var result = JSON.parse(data.response);
             var name = result.department.name
             renderData(null, {
                 result: name
             });
-        }, function() {
+        }, function () {
             renderData(null, {
                 finalResult: null
             });
         });
     },
-    getLocation: function(args) {
-        var domain = args.iparams.domain;
-        var apiKey = args.iparams.api_key;
+    getLocation: function (args) {
+        var domain = base64.decode(args.iparams.domain);
+        var apiKey = base64.decode(args.iparams.api_key);
         var id = base64.decode(args.id);
         var url = "https://" + domain + "/api/v2/locations/" + id
         var headers = {
@@ -95,13 +95,13 @@ exports = {
         var reqData = {
             headers: headers
         };
-        $request.get(url, reqData).then(function(data) {
+        $request.get(url, reqData).then(function (data) {
             var result = JSON.parse(data.response);
             var name = result.location.name;
             renderData(null, {
                 result: name
             });
-        }, function() {
+        }, function () {
             renderData(null, {
                 finalResult: null
             });
@@ -111,8 +111,8 @@ exports = {
 
 function getContactCustomFieldsLabel(args, result) {
     var requiredData = {};
-    var domain = args.iparams.domain;
-    var apiKey = args.iparams.api_key;
+    var domain = base64.decode(args.iparams.domain);
+    var apiKey = base64.decode(args.iparams.api_key);
     var personDetails = result[0];
     var url = "https://" + domain + "/api/v2/requester_fields";
     var headers = {
@@ -122,7 +122,7 @@ function getContactCustomFieldsLabel(args, result) {
     var reqData = {
         headers: headers
     };
-    $request.get(url, reqData).then(function(data) {
+    $request.get(url, reqData).then(function (data) {
         var result = JSON.parse(data.response).requester_fields;
         var labelValueObj = {};
         for (let i = 0; i < result.length; i++) {
@@ -140,7 +140,7 @@ function getContactCustomFieldsLabel(args, result) {
         renderData(null, {
             finalResult: requiredData
         });
-    }, function() {
+    }, function () {
         renderData(null, {
             finalResult: null
         });
