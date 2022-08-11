@@ -40,7 +40,7 @@ function setValues(configParams, requesterData, newFlag) {
     showContent(configParams, configParams.cust_field);
     let paramsPrefix = 'contact_';
     $.each(requesterData, function (key, val) {
-        if (configParams[paramsPrefix + (key === 'company_names' ? 'department_names' : key)] === true) {
+        if (configParams.obj[paramsPrefix + (key === 'company_names' ? 'department_names' : key)] === true) {
             $('#div-' + key).removeClass('hidden');
             if (isValNotEmpty(val)) {
                 $('#' + paramsPrefix + key).html(val);
@@ -68,7 +68,7 @@ const showContent = function (configParams, cust_field) {
 }
 function checkselectedFields(configParams) {
     console.log(configParams)
-    return (Object.values(configParams).indexOf(true) > -1) ? true : false;
+    return (Object.values(configParams.obj).indexOf(true) > -1) ? true : false;
 }
 
 function showCompany_ticketPage(val) {
