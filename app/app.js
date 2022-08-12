@@ -207,7 +207,7 @@ $(document).ready(function () {
                     $('#contact_address').html("N/A");
                     $('#contact_job_title').html("N/A")
                     $('#msg').html("Loading, please wait...");
-                    $('#div-fields').hide();
+                    $(".default-content,.custom-content").hide();
                     getReqDetail(req_email, function (reqdata) {
                         if (reqdata.result !== undefined) {
                             $('#div-department_names,#div-company_names,#div-address').show();
@@ -250,7 +250,7 @@ $(document).ready(function () {
                                         $('#contact_custom_field').html("N/A");
                                     }
                                     $('#msg,#load').empty();
-                                    $('#div-fields').show();
+                                    $(".default-content,.custom-content").show();
                                     $('#div-empty').removeClass('hidden');
                                 });
                             } else {
@@ -262,7 +262,7 @@ $(document).ready(function () {
                                     $('#contact_custom_field').html("N/A");
                                 }
                                 $('#msg,#load').empty();
-                                $('#div-fields').show();
+                                $(".default-content,.custom-content").shpw();
                                 $('#div-empty').removeClass('hidden');
                             }
                         });
@@ -299,11 +299,11 @@ $(document).ready(function () {
 
 
         function displayFields(configParams, reqData) {
-            $('#div-fields').show();
+            $(".default-content,.custom-content").show();
             $('#msg,#load').empty();
             var paramsPrefix = "contact_";
             $.each(reqData.result, function (key, val) {
-                if (configParams[paramsPrefix + key] === true) {
+                if (configParams.obj[paramsPrefix + key] === true) {
                     showDefault(paramsPrefix, key, val);
                 }
                 showName(key, configParams, val);
@@ -330,7 +330,7 @@ $(document).ready(function () {
 
         function showName(key, configParams, val) {
             if (key === "first_name") {
-                if (configParams["contact_name"] === true) {
+                if (configParams.obj["contact_name"] === true) {
                     $('#div-name').removeClass('hidden');
                     if (isValNotEmpty(val)) {
                         var fn = val;
@@ -342,7 +342,7 @@ $(document).ready(function () {
 
         function showEmail(key, configParams, val) {
             if (key === "primary_email" || key === "email") {
-                if (configParams["contact_email"] === true) {
+                if (configParams.obj["contact_email"] === true) {
                     $('#div-email').removeClass('hidden');
                     if (isValNotEmpty(val)) {
                         $('#contact_email').html(xss_test(val));
@@ -352,7 +352,7 @@ $(document).ready(function () {
         }
 
         function showWorkPhone(key, configParams, val) {
-            if (configParams["contact_phone"] === true) {
+            if (configParams.obj["contact_phone"] === true) {
                 if (key === "work_phone_number") {
                     $('#div-phone').removeClass('hidden');
                     if (val !== '' && val !== null && val !== undefined) {
@@ -365,7 +365,7 @@ $(document).ready(function () {
         }
 
         function showMobilePhone(key, configParams, val) {
-            if (configParams["contact_mobile"] === true) {
+            if (configParams.obj["contact_mobile"] === true) {
                 $('#div-mobile').removeClass('hidden');
                 if (key === "mobile_phone_number") {
                     if (val !== "" && val !== null && val !== undefined) {
@@ -379,7 +379,7 @@ $(document).ready(function () {
 
         function showCustFields(key, configParams, val) {
             if (key === "custom_fields") {
-                if (configParams["contact_custom_field"] === true) {
+                if (configParams.cust_field.length) {
                     $('#div-custom_field').removeClass('hidden');
                     var newValue = formatCustomFields(val, configParams.cust_field);
                     $('#contact_custom_field').html(newValue);
