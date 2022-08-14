@@ -5,6 +5,7 @@ function displayErr(error, client) {
     client.interface.trigger('showNotify', { type: 'error', message: 'Error: ' + message });
 }
 var formatRequesterData = function (requesterData, configParams, callback) {
+    console.log("8")
     $.each(requesterData, function (key, val) {
         if (val !== null) {
             let newVal = val;
@@ -47,11 +48,7 @@ function setValues(configParams, requesterData, newFlag) {
             }
             // numberOfFieldsDisplayed++;
         }
-        if (key == "custom_field") {
-            var newValue = formatCustomFields(requesterData.custom_field, configParams.cust_field);
-            $("#contact_custom_field").html(newValue);
-            $("#div-custom_field").removeClass('hidden');
-        }
+        
     });
     /*  if (numberOfFieldsDisplayed === 0) {
          if (newFlag === false) {
@@ -61,13 +58,11 @@ function setValues(configParams, requesterData, newFlag) {
      } */
 }
 const showContent = function (configParams, cust_field) {
-    console.log(checkselectedFields(configParams))
     if (checkselectedFields(configParams)) $(".default-content").show();
     if (cust_field.length)
         $(".custom-content").show();
 }
 function checkselectedFields(configParams) {
-    console.log(configParams)
     return (Object.values(configParams.obj).indexOf(true) > -1) ? true : false;
 }
 
@@ -244,6 +239,7 @@ $(document).ready(function () {
                                 getReqDetail(req_email, function (reqdata) {
                                     var val = reqdata.labelValueObj;
                                     $('#div-custom_field').removeClass('hidden');
+                                    console.log("250")
                                     var newValue = formatCustomFields(val, configParams.cust_field);
                                     $('#contact_custom_field').html(newValue);
                                     if ($.isEmptyObject(val)) {
@@ -256,13 +252,14 @@ $(document).ready(function () {
                             } else {
                                 var val = agentdata.labelValueObj;
                                 $('#div-custom_field').removeClass('hidden');
+                                console.log("262")
                                 var newValue = formatCustomFields(val, configParams.cust_field);
                                 $('#contact_custom_field').html(newValue);
                                 if ($.isEmptyObject(val)) {
                                     $('#contact_custom_field').html("N/A");
                                 }
                                 $('#msg,#load').empty();
-                                $(".default-content,.custom-content").shpw();
+                                $(".default-content,.custom-content").show();
                                 $('#div-empty').removeClass('hidden');
                             }
                         });
@@ -381,6 +378,7 @@ $(document).ready(function () {
             if (key === "custom_fields") {
                 if (configParams.cust_field.length) {
                     $('#div-custom_field').removeClass('hidden');
+                    console.log("386")
                     var newValue = formatCustomFields(val, configParams.cust_field);
                     $('#contact_custom_field').html(newValue);
                     if ($.isEmptyObject(val)) {
@@ -391,7 +389,7 @@ $(document).ready(function () {
         }
 
         function showDepartments(key, configParams, val) {
-            if (configParams["contact_department_names"] === true) {
+            if (configParams.obj["contact_department_names"] === true) {
                 if (key === "department_ids") {
                     $('#div-department_names').removeClass('hidden');
                     if (Array.isArray(val) && val.length > 0) {
@@ -405,7 +403,7 @@ $(document).ready(function () {
         }
 
         function showLocation(key, configParams, val) {
-            if (configParams["contact_location_name"] === true) {
+            if (configParams.obj["contact_location_name"] === true) {
                 $('#div-location_name').removeClass('hidden');
                 if (key === "location_id") {
                     if (val !== null && val !== '' && val !== undefined) {

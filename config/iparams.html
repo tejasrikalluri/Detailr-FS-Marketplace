@@ -223,33 +223,30 @@
             var options = {
                 headers: headers
             };
-            client.request.get(url, options).then(
-                function (field_data) {
-                    try {
-                        var selectOptions = [];
-                        var dataRes = JSON.parse(field_data.response);
-                        var requester_fields = dataRes.requester_fields;
-                        for (var i = 0; i < requester_fields.length; i++) {
-                            if (requester_fields[i].default === false) {
-                                var field_label = requester_fields[i].label;
-                                var field_name = requester_fields[i].name;
-                                selectOptions.push(
-                                    `<option value=${field_name}>${field_label}</option>`
-                                );
-                            }
+            client.request.get(url, options).then(function (field_data) {
+                try {
+                    var selectOptions = [];
+                    var dataRes = JSON.parse(field_data.response);
+                    var requester_fields = dataRes.requester_fields;
+                    for (var i = 0; i < requester_fields.length; i++) {
+                        if (requester_fields[i].default === false) {
+                            var field_label = requester_fields[i].label;
+                            var field_name = requester_fields[i].name;
+                            selectOptions.push(
+                                `<option value=${field_name}>${field_label}</option>`
+                            );
                         }
-                        $("#multiCustFields").html(selectOptions.join(""));
-                        if (updateConfigs !== undefined) {
-                            if (updateConfigs.cust_field.length > 0) {
-                                $("#multiCustFields")
-                                    .val(updateConfigs.cust_field)
-                                    .trigger("change");
-                            }
-                        }
-                    } catch (error) {
-                        handleError(error);
                     }
-                },
+                    $("#multiCustFields").html(selectOptions.join(""));
+                    if (updateConfigs !== undefined) {
+                        $("#multiCustFields")
+                            .val(updateConfigs.selected_cust_fields)
+                            .trigger("change");
+                    }
+                } catch (error) {
+                    handleError(error);
+                }
+            },
                 function (error) {
                     handleError(error);
                 }
@@ -261,7 +258,10 @@
             var fd_domain = $('#fdUrl').val();
             var api_key = $('#txtApiKey').val();
             let selected_fields = $("#multiCustFields").select2("data");
-            let optionsArr = $("#multiCustFields").val();
+            let optionsArr = [];
+            $.each(selected_fields, (k, v) => {
+                optionsArr.push(v.text)
+            });
             var ids = checkboxes.map(function () {
                 return this.id;
             }).get();
@@ -279,7 +279,7 @@
                 api_key: btoa(api_key),
                 obj,
                 domain: btoa(fd_domain),
-                cust_field: optionsArr
+                cust_field: optionsArr, selected_cust_fields: $("#multiCustFields").val()
             };
         }
 
