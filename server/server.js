@@ -24,7 +24,7 @@ exports = {
             } else {
                 getContactCustomFieldsLabel(args, result);
             }
-        }, function (e) {
+        }, function () {
             renderData(null, {
                 finalResult: null
             });

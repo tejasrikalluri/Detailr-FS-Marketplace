@@ -30,7 +30,7 @@ var formatRequesterData = function (requesterData, configParams, callback) {
     callback(requesterData);
 }
 //Set values and shows respective divs
-function setValues(configParams, requesterData, newFlag) {
+function setValues(configParams, requesterData) {
     // $("#msg,#load").empty();
     /* if (checkselectedFields(configParams)) $(".default-content").show();
     if (newFlag === false)
@@ -83,7 +83,7 @@ $(document).ready(function () {
             client.data.get('requester').then(function (data) {
                 var req_data = data.requester;
                 callback(req_data);
-            }).catch(function (e) {
+            }).catch(function () {
                 displayErr("Unexpected error occurred, please try after some time.", client);
             });
         };
@@ -243,13 +243,7 @@ $(document).ready(function () {
         }
         function displayDefaultFields(req_data, configParams) {
             formatRequesterData(req_data, configParams, function (data) {
-                if (configParams.cust_field.length) {
-                    var flag = true;
-                    setValues(configParams, data, flag);
-                } else {
-                    var flag = false;
-                    setValues(configParams, data, flag);
-                }
+                setValues(configParams, data);
                 $(".default-content,.custom-content").show();
                 $('#msg,#load').empty();
             });
