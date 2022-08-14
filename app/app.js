@@ -5,7 +5,6 @@ function displayErr(error, client) {
     client.interface.trigger('showNotify', { type: 'error', message: 'Error: ' + message });
 }
 var formatRequesterData = function (requesterData, configParams, callback) {
-    console.log("8")
     $.each(requesterData, function (key, val) {
         if (val !== null) {
             let newVal = val;
@@ -32,13 +31,10 @@ var formatRequesterData = function (requesterData, configParams, callback) {
 }
 //Set values and shows respective divs
 function setValues(configParams, requesterData, newFlag) {
-    // if (newFlag === false) {
-    //     $('#msg,#load').empty();
-    //     $('#div-fields').show();
-    // }
-    // let numberOfFieldsDisplayed = 0;
-    $("#msg,#load").empty();
-    showContent(configParams, configParams.cust_field);
+    // $("#msg,#load").empty();
+    /* if (checkselectedFields(configParams)) $(".default-content").show();
+    if (newFlag === false)
+        $('#msg,#load').empty(); */
     let paramsPrefix = 'contact_';
     $.each(requesterData, function (key, val) {
         if (configParams.obj[paramsPrefix + (key === 'company_names' ? 'department_names' : key)] === true) {
@@ -46,21 +42,9 @@ function setValues(configParams, requesterData, newFlag) {
             if (isValNotEmpty(val)) {
                 $('#' + paramsPrefix + key).html(val);
             }
-            // numberOfFieldsDisplayed++;
         }
-        
+
     });
-    /*  if (numberOfFieldsDisplayed === 0) {
-         if (newFlag === false) {
-             $('#div-empty').removeClass('hidden');
-             $('#msg,#load').empty();
-         }
-     } */
-}
-const showContent = function (configParams, cust_field) {
-    if (checkselectedFields(configParams)) $(".default-content").show();
-    if (cust_field.length)
-        $(".custom-content").show();
 }
 function checkselectedFields(configParams) {
     return (Object.values(configParams.obj).indexOf(true) > -1) ? true : false;
@@ -222,16 +206,8 @@ $(document).ready(function () {
 
         function showData_TicketDetailPage(location, configParams) {
             if (location === "ticket_requester_info" || location === "contact_sidebar") {
+                $('#msg').html("Loading, please wait...");
                 getRequesterData(function (req_data) {
-                    formatRequesterData(req_data, configParams, function (data) {
-                        if (configParams.cust_field.length) {
-                            var flag = true;
-                            setValues(configParams, data, flag);
-                        } else {
-                            var flag = false;
-                            setValues(configParams, data, flag);
-                        }
-                    });
                     if (configParams.cust_field.length) {
                         var req_email = req_data.email;
                         getAgentDetail(req_email, function (agentdata) {
@@ -239,55 +215,57 @@ $(document).ready(function () {
                                 getReqDetail(req_email, function (reqdata) {
                                     var val = reqdata.labelValueObj;
                                     $('#div-custom_field').removeClass('hidden');
-                                    console.log("250")
                                     var newValue = formatCustomFields(val, configParams.cust_field);
                                     $('#contact_custom_field').html(newValue);
                                     if ($.isEmptyObject(val)) {
                                         $('#contact_custom_field').html("N/A");
                                     }
-                                    $('#msg,#load').empty();
-                                    $(".default-content,.custom-content").show();
-                                    $('#div-empty').removeClass('hidden');
+                                    displayDefaultFields(req_data, configParams);
                                 });
                             } else {
                                 var val = agentdata.labelValueObj;
                                 $('#div-custom_field').removeClass('hidden');
-                                console.log("262")
                                 var newValue = formatCustomFields(val, configParams.cust_field);
                                 $('#contact_custom_field').html(newValue);
                                 if ($.isEmptyObject(val)) {
                                     $('#contact_custom_field').html("N/A");
                                 }
-                                $('#msg,#load').empty();
-                                $(".default-content,.custom-content").show();
-                                $('#div-empty').removeClass('hidden');
+                                displayDefaultFields(req_data, configParams);
                             }
+
                         });
+                    } else {
+                        displayDefaultFields(req_data, configParams);
                     }
+
                 });
             }
         }
-
+        function displayDefaultFields(req_data, configParams) {
+            formatRequesterData(req_data, configParams, function (data) {
+                if (configParams.cust_field.length) {
+                    var flag = true;
+                    setValues(configParams, data, flag);
+                } else {
+                    var flag = false;
+                    setValues(configParams, data, flag);
+                }
+                $(".default-content,.custom-content").show();
+                $('#msg,#load').empty();
+            });
+        }
         client.events.on('app.activated', function () {
             $('#msg').html("Loading, please wait...");
-            // $("#div-fields").hide();
             $(".default-content,.custom-content").hide();
             getConfigurationParams(function (error, data) {
                 if (error) {
                     displayErr("Unexpected error occurred, please try after some time.", client);
                 } else {
                     var configParams = data;
-                    var flag = checkselectedFields(configParams);
-                    /* if (!flag) {
-                        $('#div-empty').removeClass('hidden');
-                        $('#msg,#load').empty();
-                    } else { */
-                    $('#div-empty').empty();
                     getAppLocation(function (location) {
                         showData_TicketDetailPage(location, configParams);
                         showData_newTicketPage(location, configParams);
                     });
-                    // }
                 }
             });
         }, function () {
@@ -378,7 +356,6 @@ $(document).ready(function () {
             if (key === "custom_fields") {
                 if (configParams.cust_field.length) {
                     $('#div-custom_field').removeClass('hidden');
-                    console.log("386")
                     var newValue = formatCustomFields(val, configParams.cust_field);
                     $('#contact_custom_field').html(newValue);
                     if ($.isEmptyObject(val)) {

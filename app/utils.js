@@ -22,16 +22,13 @@ function formatCustomFields(values, cust_fields) {
     let custArr = [];
     $.each(cust_fields, function (key, val) {
         let value;
-        console.log(values[val])
         value = (values[val] && values[val] != " ") ? values[val] : "N/A";
         custArr.push(
-            '<div><span class="muted ucwords" style="color:#475867;margin-right: 2%;">' +
-            val.replace(/\_/g, " ").charAt(0).toUpperCase() + val.replace(/\_/g, " ").slice(1) +
+            '<div><span class="muted ucwords">' +
+            val +
             "</span>",
             ": ",
-            '<span class="muted ucwords">' +
             xss_test(value) +
-            "</span>",
             "<br/></div>"
         );
     });
