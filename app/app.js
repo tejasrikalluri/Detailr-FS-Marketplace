@@ -31,10 +31,6 @@ var formatRequesterData = function (requesterData, configParams, callback) {
 }
 //Set values and shows respective divs
 function setValues(configParams, requesterData) {
-    // $("#msg,#load").empty();
-    /* if (checkselectedFields(configParams)) $(".default-content").show();
-    if (newFlag === false)
-        $('#msg,#load').empty(); */
     let paramsPrefix = 'contact_';
     $.each(requesterData, function (key, val) {
         if (configParams.obj[paramsPrefix + (key === 'company_names' ? 'department_names' : key)] === true) {
@@ -45,9 +41,6 @@ function setValues(configParams, requesterData) {
         }
 
     });
-}
-function checkselectedFields(configParams) {
-    return (Object.values(configParams.obj).indexOf(true) > -1) ? true : false;
 }
 
 function showCompany_ticketPage(val) {

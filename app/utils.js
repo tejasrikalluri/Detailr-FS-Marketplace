@@ -17,8 +17,6 @@ function formatDate(val) {
 
 //formats custom fields
 function formatCustomFields(values, cust_fields) {
-    console.log(values)
-    console.log(cust_fields)
     let custArr = [];
     $.each(cust_fields, function (key, val) {
         let value;
@@ -32,21 +30,6 @@ function formatCustomFields(values, cust_fields) {
             "<br/></div>"
         );
     });
-    /* $.each(values, function (key, val) {
-        let newVal = 'N/A';
-        if (isValNotEmpty(val)) {
-            newVal = val;
-            if (isISODate(val)) {
-                newVal = formatDate(val);
-            }
-        }
-        custArr.push(
-            '<span class="muted ucwords">' + key + '</span>',
-            ': ',
-            xss_test(newVal),
-            '<br/>'
-        );
-    }); */
     return custArr.join('');
 }
 
