@@ -42,9 +42,6 @@ function setValues(configParams, requesterData) {
 
     });
 }
-function checkselectedFields(configParams) {
-    return (Object.values(configParams.obj).indexOf(true) > -1) ? true : false;
-}
 
 function showCompany_ticketPage(val) {
     if (Array.isArray(val) && val.length) {
